@@ -144,3 +144,17 @@ html.acesso-bloqueado body > *:not(.acesso-gate) { visibility: hidden; }
   background: transparent; border: 1px solid var(--border, var(--ac-linha)); border-radius: 8px; cursor: pointer;
 }
 .btn-sair:hover { background: var(--chip-bg, var(--ac-linha)); color: var(--text-primary, var(--ac-texto)); }
+
+/* barra de progresso enquanto o servidor trabalha */
+.acesso-progresso { margin-top: 14px; }
+.acesso-progresso[hidden] { display: none; }
+.acesso-barra {
+  height: 6px; border-radius: 99px; overflow: hidden;
+  background: color-mix(in srgb, var(--ac-destaque) 15%, transparent);
+}
+.acesso-barra span {
+  display: block; height: 100%; width: 0%;
+  background: var(--ac-destaque); border-radius: 99px;
+  transition: width .25s linear;
+}
+.acesso-progresso-texto { margin: 8px 0 0; font-size: 12.5px; color: var(--ac-texto-2); }

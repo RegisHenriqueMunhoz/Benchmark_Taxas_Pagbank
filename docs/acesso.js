@@ -149,7 +149,7 @@ function abrirPortao(){
 
         '<form id="acessoFormCodigo" hidden novalidate>' +
           '<p class="acesso-texto">Se <b id="acessoEmailMostrado"></b> estiver autorizado, você vai ' +
-            'receber um código de 6 dígitos em instantes. Ele vale por 10 minutos.</p>' +
+            'receber um código de 6 dígitos — pode levar até 1 minuto para chegar. Ele vale por 10 minutos.</p>' +
           '<div class="acesso-otp" id="acessoOtp" role="group" aria-label="Código de 6 dígitos">' +
             [0,1,2,3,4,5].map(function(i){
               return '<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" ' +
@@ -164,6 +164,10 @@ function abrirPortao(){
           '</div>' +
         '</form>' +
 
+        '<div class="acesso-progresso" id="acessoProgresso" hidden>' +
+          '<div class="acesso-barra"><span id="acessoBarra"></span></div>' +
+          '<p class="acesso-progresso-texto" id="acessoProgressoTexto"></p>' +
+        '</div>' +
         '<p class="acesso-msg" id="acessoMsg" role="status" aria-live="polite"></p>' +
       '</div>';
     document.body.appendChild(gate);
@@ -179,10 +183,36 @@ function abrirPortao(){
     var relogio = null;
 
     function aviso(texto, tipo){ msg.textContent = texto || ''; msg.className = 'acesso-msg' + (tipo ? ' ' + tipo : ''); }
-    function ocupado(form, sim, rotulo){
+    // Barra de progresso: avança sozinha até ~95% no tempo estimado e
+    // completa quando o servidor responde.
+    var caixaProg = gate.querySelector('#acessoProgresso');
+    var barra = gate.querySelector('#acessoBarra');
+    var textoProg = gate.querySelector('#acessoProgressoTexto');
+    var timerProg = null;
+    function progresso(texto, segundos){
+      clearInterval(timerProg);
+      if (!texto){
+        barra.style.width = '100%';
+        setTimeout(function(){ caixaProg.hidden = true; barra.style.width = '0%'; }, 250);
+        return;
+      }
+      var inicio = Date.now();
+      caixaProg.hidden = false;
+      barra.style.width = '2%';
+      timerProg = setInterval(function(){
+        var t = (Date.now() - inicio) / 1000;
+        var pct = Math.min(95, 95 * (1 - Math.exp(-2.5 * t / segundos)));
+        barra.style.width = pct.toFixed(1) + '%';
+        var resta = Math.max(0, Math.ceil(segundos - t));
+        textoProg.textContent = texto + (resta > 0 ? ' (até ~' + resta + ' s)' : ' Quase lá…');
+      }, 250);
+    }
+    function ocupado(form, sim, rotulo, textoProgresso, segundos){
       var b = form.querySelector('.acesso-botao');
       b.disabled = sim;
       if (rotulo) b.textContent = rotulo;
+      if (sim && textoProgresso) progresso(textoProgresso, segundos || 60);
+      if (!sim) progresso(null);
     }
     function codigo(){ return digitos.map(function(d){ return d.value; }).join(''); }
     function limparCodigo(){ digitos.forEach(function(d){ d.value = ''; }); digitos[0].focus(); }
@@ -223,7 +253,7 @@ function abrirPortao(){
       email = campoEmail.value.trim().toLowerCase();
       if (!emailValido(email)){ aviso('Digite um e-mail válido.', 'erro'); campoEmail.focus(); return; }
       aviso('');
-      ocupado(formEmail, true, 'Enviando…');
+      ocupado(formEmail, true, 'Enviando…', 'Gerando e enviando o código por e-mail.', 60);
       solicitar()
         .then(function(){
           gate.querySelector('#acessoEmailMostrado').textContent = email;
@@ -272,7 +302,7 @@ function abrirPortao(){
       if (!/^\d{6}$/.test(c)){ aviso('Digite os 6 dígitos do código.', 'erro'); return; }
       validando = true;
       aviso('');
-      ocupado(formCodigo, true, 'Validando…');
+      ocupado(formCodigo, true, 'Validando…', 'Validando o código e abrindo o painel.', 45);
 
       chamar({ acao: 'validar', email: email, codigo: c })
         .then(function(r){
@@ -313,10 +343,12 @@ function abrirPortao(){
     });
 
     btReenviar.addEventListener('click', function(){
-      aviso('Enviando um novo código…');
+      aviso('');
+      btReenviar.disabled = true;
+      progresso('Enviando um novo código por e-mail.', 60);
       solicitar()
-        .then(function(){ aviso('Novo código enviado. O anterior deixou de valer.', 'ok'); contagem(); limparCodigo(); })
-        .catch(function(e){ aviso('Não foi possível reenviar: ' + e.message, 'erro'); });
+        .then(function(){ progresso(null); aviso('Novo código enviado. O anterior deixou de valer.', 'ok'); contagem(); limparCodigo(); })
+        .catch(function(e){ progresso(null); btReenviar.disabled = false; aviso('Não foi possível reenviar: ' + e.message, 'erro'); });
     });
 
     gate.querySelector('#acessoTrocar').addEventListener('click', function(){
