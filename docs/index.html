@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://fd3f9404018ded99aae38c7e0b348b.eb.environment.api.powerplatform.com:443; base-uri 'self'; form-action 'none'; object-src 'none'">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Acesso restrito</title>
+  <link rel="stylesheet" href="acesso.css">
+</head>
+<body>
+  <div class="shell-status" id="shellStatus" role="status" aria-live="polite">
+    <span class="shell-spinner" aria-hidden="true"></span>
+    <span id="shellStatusTexto">Carregando…</span>
+    <span id="shellStatusAcao"></span>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="acesso.js"></script>
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+/* Estrutura pública: tela de acesso e carregamento. Sem marca, sem conteúdo.
+   Cores próprias (a folha de estilos da aplicação só chega depois do acesso). */
+
+:root {
+  --ac-fundo: #f4f5f3;
+  --ac-cartao: #ffffff;
+  --ac-texto: #0b0b0b;
+  --ac-texto-2: #52514e;
+  --ac-texto-3: #898781;
+  --ac-linha: #e6e5e0;
+  --ac-borda: #c3c2b7;
+  --ac-campo: #ffffff;
+  --ac-destaque: #00a868;
+  --ac-destaque-texto: #00693f;
+  --ac-erro: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ac-fundo: #0d0d0d;
+    --ac-cartao: #1a1a19;
+    --ac-texto: #ffffff;
+    --ac-texto-2: #c3c2b7;
+    --ac-texto-3: #8f8d86;
+    --ac-linha: #2c2c2a;
+    --ac-borda: #3a3a37;
+    --ac-campo: #232321;
+    --ac-destaque: #1fbf7d;
+    --ac-destaque-texto: #7de3bb;
+    --ac-erro: #ef5555;
+  }
+}
+
+html, body { margin: 0; }
+body {
+  background: var(--ac-fundo);
+  color: var(--ac-texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- carregando / erro (antes de montar a aplicação) ---------- */
+.shell-status {
+  min-height: 100vh; box-sizing: border-box; padding: 24px;
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  font-size: 14px; color: var(--ac-texto-2);
+}
+.shell-status.erro { color: var(--ac-erro); }
+.shell-status.erro .shell-spinner { display: none; }
+.shell-spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--ac-linha); border-top-color: var(--ac-destaque);
+  animation: shell-girar .8s linear infinite;
+}
+@keyframes shell-girar { to { transform: rotate(360deg); } }
+.shell-botao {
+  height: 34px; padding: 0 14px; border: 0; border-radius: 8px; cursor: pointer;
+  font: inherit; font-weight: 600; color: #fff; background: var(--ac-destaque);
+}
+
+/* ---------- tela de acesso ---------- */
+.acesso-gate {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, color-mix(in srgb, var(--ac-destaque) 18%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 110% 110%, color-mix(in srgb, var(--ac-destaque) 12%, transparent), transparent 60%),
+    var(--ac-fundo);
+  transition: opacity .35s ease;
+}
+.acesso-gate.saindo { opacity: 0; pointer-events: none; }
+html.acesso-bloqueado body { overflow: hidden; }
+html.acesso-bloqueado body > *:not(.acesso-gate) { visibility: hidden; }
+
+.acesso-card {
+  width: 100%; max-width: 420px; box-sizing: border-box;
+  background: var(--ac-cartao);
+  border: 1px solid color-mix(in srgb, var(--ac-texto) 10%, transparent);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.08);
+  padding: 32px 32px 26px;
+}
+.acesso-icone {
+  width: 44px; height: 44px; border-radius: 12px; margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--ac-destaque) 14%, transparent);
+  color: var(--ac-destaque-texto);
+}
+.acesso-card h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: -.01em; }
+.acesso-sub { margin: 0 0 24px; color: var(--ac-texto-2); font-size: 13.5px; line-height: 1.45; }
+
+.acesso-card form { display: flex; flex-direction: column; gap: 12px; }
+.acesso-card form[hidden] { display: none; }
+.acesso-card label { font-size: 12.5px; font-weight: 600; color: var(--ac-texto-2); }
+.acesso-texto { margin: 0; font-size: 13.5px; color: var(--ac-texto-2); line-height: 1.45; }
+.acesso-texto b { color: var(--ac-texto); word-break: break-all; }
+
+.acesso-input {
+  width: 100%; box-sizing: border-box; height: 44px; padding: 0 14px;
+  font: inherit; font-size: 15px; color: var(--ac-texto);
+  background: var(--ac-campo);
+  border: 1px solid var(--ac-borda); border-radius: 10px;
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.acesso-input:focus { border-color: var(--ac-destaque); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac-destaque) 22%, transparent); }
+
+.acesso-otp { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.acesso-otp input {
+  width: 100%; min-width: 0; padding: 0; box-sizing: border-box;
+  height: 54px; text-align: center;
+  font: inherit; font-size: 24px; font-weight: 600; color: var(--ac-texto);
+  background: var(--ac-campo);
+  border: 1px solid var(--ac-borda); border-radius: 10px; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.acesso-otp input:focus { border-color: var(--ac-destaque); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac-destaque) 22%, transparent); }
+.acesso-otp.erro input { border-color: var(--ac-erro); animation: acesso-tremer .3s; }
+@keyframes acesso-tremer { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+.acesso-botao {
+  height: 44px; margin-top: 4px;
+  font: inherit; font-size: 15px; font-weight: 600; color: #fff;
+  background: var(--ac-destaque); border: 0; border-radius: 10px; cursor: pointer;
+  transition: filter .15s, opacity .15s;
+}
+.acesso-botao:hover { filter: brightness(1.05); }
+.acesso-botao:disabled { opacity: .6; cursor: progress; }
+
+.acesso-links { display: flex; justify-content: space-between; gap: 8px; }
+.acesso-link {
+  background: none; border: 0; padding: 4px 0; cursor: pointer;
+  font: inherit; font-size: 13px; color: var(--ac-destaque-texto);
+}
+.acesso-link:disabled { color: var(--ac-texto-3); cursor: default; }
+
+.acesso-msg { min-height: 20px; margin: 14px 0 0; font-size: 13px; color: var(--ac-texto-2); }
+.acesso-msg.erro { color: var(--ac-erro); }
+.acesso-msg.ok { color: var(--ac-destaque-texto); }
+
+/* botão "Sair", colocado na barra da aplicação depois de montada */
+.btn-sair {
+  height: 32px; padding: 0 12px; margin-right: 6px;
+  font: inherit; font-size: 12.5px; color: var(--text-secondary, var(--ac-texto-2));
+  background: transparent; border: 1px solid var(--border, var(--ac-linha)); border-radius: 8px; cursor: pointer;
+}
+.btn-sair:hover { background: var(--chip-bg, var(--ac-linha)); color: var(--text-primary, var(--ac-texto)); }
